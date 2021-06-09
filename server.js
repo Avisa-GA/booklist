@@ -10,6 +10,7 @@ const app = express();
 const mongoose = require('mongoose')
 const Book = require('./models/book.js')
 const bookSeed = require('./models/bookSeed.js')
+const methodOverride = require('method-override')
 
 // =======================
 // Middleware
@@ -17,7 +18,7 @@ const bookSeed = require('./models/bookSeed.js')
 // Body parser middleware: give us access to req.body
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
-
+app.use(methodOverride('_method'))
 // ===================
 // Database Connection
 // ===================
@@ -72,6 +73,28 @@ app.get('/books/new', (req, res) => {
     res.render('new.ejs')
 })
 
+// DELETE
+app.delete('/books/:id', (req, res) => {
+    Book.findByIdAndDelete(req.params.id, (err, deletedBook) => {
+           res.redirect('/books')
+    })
+})
+
+// UPDATE
+app.put('/books/:id', (req, res) => {
+    // reformat the completed property
+    if (req.body.completed === 'on') {
+        req.body.completed = true
+    } else {
+        req.body.completed = false
+    }
+    // step 2: find the book in mongodb and update it with req.body
+    Book.findByIdAndUpdate(req.params.id, req.body, { new: true }, (err, updatedBook) => {
+        res.redirect(`/books/${req.params.id}`)
+    })
+    
+})
+
 // CREATE
 app.post('/books', (req, res) => {
 
@@ -88,13 +111,22 @@ app.post('/books', (req, res) => {
     });
 })
 
+// EDIT
+app.get('/books/:id/edit', (req, res) => {
+    // We need to find the book We are editing
+    // We need to insert the book into template
+    Book.findById(req.params.id, (err, foundBook) => {
+        res.render('edit.ejs', { /* Context Object */
+            book: foundBook
+        })
+    })
+})
+
 // SHOW
 app.get('/books/:id', (req, res) => {
     Book.findById(req.params.id, (err, foundBook) => {
         res.render('show.ejs', {
-            title: foundBook.title,
-            author: foundBook.author,
-            completed: foundBook.completed,
+            book: foundBook,
         })
     })
 })

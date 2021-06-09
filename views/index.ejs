@@ -16,6 +16,10 @@
 			<% books.forEach(book => { %>
 			<li>
                 <a href="/books/<%=book._id; %>"><%=book.title; %></a>
+				<form action="/books/<%= book._id%>/?_method=DELETE" method="POST" style="display: inline; margin-left: 1rem;">
+					<input type="submit" value="DELETE">
+				</form>
+				<a href="/books/<%= book._id%>/edit">EDIT</a>
             </li>
 			<% }) %>
 
