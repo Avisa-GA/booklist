@@ -9,6 +9,7 @@ const PORT = process.env.PORT;
 const app = express();
 const mongoose = require('mongoose')
 const Book = require('./models/book.js')
+const bookSeed = require('./models/bookSeed.js')
 
 // =======================
 // Middleware
@@ -42,6 +43,16 @@ db.on('disconnected', () => console.log('mongo disconnected'));
 // ========================================================
 // INDUCES (index, new, delete, update, create, edit, show) 
 // ========================================================
+// Routes / Controllers
+// Seed
+app.get('/books/seed', (req, res) => {
+
+    Book.deleteMany({}, (err, allBooks) => {})
+    Book.create(bookSeed, (err, data) => {
+        res.redirect('/books')
+    })
+      
+});
 // ROOT
 app.get('/', (req, res) => {
     res.send('Welcome to Booklist App')
@@ -81,7 +92,9 @@ app.post('/books', (req, res) => {
 app.get('/books/:id', (req, res) => {
     Book.findById(req.params.id, (err, foundBook) => {
         res.render('show.ejs', {
-            book: foundBook,
+            title: foundBook.title,
+            author: foundBook.author,
+            completed: foundBook.completed,
         })
     })
 })
